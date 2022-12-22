@@ -46,6 +46,10 @@ var forecastRequestURL = 'api.openweathermap.org/data/2.5/forecast?lat={lat}&lon
 
 function generateWeatherCard(resultObj){
     
+    if(resultObj == null){
+        return
+    } else {}   
+
     // console.log(resultObj);
 
     //set up <div> to hold result
@@ -60,6 +64,8 @@ function generateWeatherCard(resultObj){
     titleEl.textContent = resultObj.date;
 
     var bodyContentEl = document.createElement('p');
+    var bodyImageEl = document.createElement('img');
+    
 
     if (resultObj.date) {
         bodyContentEl.innerHTML +=
@@ -67,6 +73,14 @@ function generateWeatherCard(resultObj){
       } else {
         bodyContentEl.innerHTML +=
           '<strong>Date:</strong> No Date Available.';
+      }
+
+      if (resultObj.icon) {
+        bodyImageEl.setAttribute("src", "http://openweathermap.org/img/wn/" + resultObj.icon + "@2x.png");
+        bodyImageEl.setAttribute("alt", "Picture depicting weather conditions at chosen City");
+      } else {
+        bodyImageEl.innerHTML +=
+          '<strong>Icon:</strong> No Icon Available.';
       }
     
       if (resultObj.temp) {
@@ -93,7 +107,7 @@ function generateWeatherCard(resultObj){
           '<strong>Humidity:</strong>  No Humidity Available.';
       }
 
-      resultBody.append(titleEl, bodyContentEl);
+      resultBody.append(titleEl,bodyImageEl, bodyContentEl);
 
       resultContentEl.append(resultCard);
     
@@ -114,14 +128,13 @@ function setWeatherData(event){
 
     console.log(geoRequestURL);
 
-    // location.reload();
-    
-
     fetch(geoRequestURL)
         .then(function (response) {
         return response.json();
         })
         .then(function (data) {
+
+            
 
             for(var i = 0; i < data.list.length; i++){
 
@@ -130,17 +143,20 @@ function setWeatherData(event){
 
                     var currentObj = {
                         date: data.list[i].dt_txt,
+                        icon: data.list[i].weather[0].icon,
                         temp: data.list[i].main.temp,
                         wind: data.list[i].wind.speed,
                         humidity: data.list[i].main.humidity,
                        }
 
                        console.log(currentObj);
+                       console.log(data.list[i].weather[0].icon);
                        localStorage.setItem("currentObj", JSON.stringify(currentObj));
 
                 } else if(data.list[i].dt_txt == secondDay + " 12:00:00"){
                     var secondObj = {
                         date: data.list[i].dt_txt,
+                        icon: data.list[i].weather[0].icon,
                         temp: data.list[i].main.temp,
                         wind: data.list[i].wind.speed,
                         humidity: data.list[i].main.humidity,
@@ -151,6 +167,7 @@ function setWeatherData(event){
                 } else if(data.list[i].dt_txt == thirdDay + " 12:00:00"){
                     var thirdObj = {
                         date: data.list[i].dt_txt,
+                        icon: data.list[i].weather[0].icon,
                         temp: data.list[i].main.temp,
                         wind: data.list[i].wind.speed,
                         humidity: data.list[i].main.humidity,
@@ -162,6 +179,7 @@ function setWeatherData(event){
                 } else if(data.list[i].dt_txt == fourthDay + " 12:00:00"){
                     var fourthObj = {
                         date: data.list[i].dt_txt,
+                        icon: data.list[i].weather[0].icon,
                         temp: data.list[i].main.temp,
                         wind: data.list[i].wind.speed,
                         humidity: data.list[i].main.humidity,
@@ -172,6 +190,7 @@ function setWeatherData(event){
                 } else if(data.list[i].dt_txt == fifthDay + " 12:00:00"){
                     var fifthObj = {
                         date: data.list[i].dt_txt,
+                        icon: data.list[i].weather[0].icon,
                         temp: data.list[i].main.temp,
                         wind: data.list[i].wind.speed,
                         humidity: data.list[i].main.humidity,
@@ -211,19 +230,15 @@ function setWeatherData(event){
 
 function renderCards(){
 
-    
-    
-
     console.log("Render Data");
     
-
     generateWeatherCard(parseCurrent);
     generateWeatherCard(parseSecond);
     generateWeatherCard(parseThird);
     generateWeatherCard(parseFourth);
     generateWeatherCard(parseFifth);
 
-    // location.reload();
+
 }
 
 
@@ -234,10 +249,10 @@ searchButtonEl.addEventListener('click', setWeatherData);
 searchButtonEl.addEventListener('click', function(){
     renderCards;
 
-    setTimeout(()=> {
-        location.reload();
-     }
-     ,300);
+    // setTimeout(()=> {
+    //     location.reload();
+    //  }
+    //  ,200);
     
 });
 
