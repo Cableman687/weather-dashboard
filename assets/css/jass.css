@@ -978,9 +978,10 @@ a:hover {
   font-size: 1rem;
   border-radius: 0.3rem;
   border: 1px solid transparent;
+  border-color: black;
   outline: none;
   color: #1a1a1a;
-  background-color: #aeaeae;
+  background-color: #918f8f;
   transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out;
 }
 
@@ -1165,9 +1166,9 @@ form [type='radio'] {
 }
 
 .container {
-  width: 85%;
+  width: 95%; 
   max-width: 1200px;
-  margin-left: auto;
+   margin-left: auto;
   margin-right: auto;
 }
 

@@ -1,8 +1,8 @@
-var resultContentEl = document.querySelector('#result-content');
 var searchButtonEl = document.querySelector('.btn');
 var searchInputEl = document.querySelector('#search-input');
-
-
+var searchResultsEl = document.querySelector('#search-results');
+var resultContentEl = document.querySelector('#result-content');
+var currentContentEl = document.querySelector('#current-content');
 
 
 var API = "7667cfca874b74000c9b36ceae722891";
@@ -12,37 +12,74 @@ var secondDay = dayjs().add(1,'day').format('YYYY-MM-DD');
 var thirdDay = dayjs().add(2,'day').format('YYYY-MM-DD');
 var fourthDay = dayjs().add(3,'day').format('YYYY-MM-DD');
 var fifthDay = dayjs().add(4,'day').format('YYYY-MM-DD');
+var sixthDay = dayjs().add(5,'day').format('YYYY-MM-DD');
+
+console.log(sixthDay);
 
 //5-day Forecast API
 //Requirements: Latitude, Longitude, API Key.
 var forecastRequestURL = 'api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&appid=7667cfca874b74000c9b36ceae722891';
 //--
-// WHEN I search for a city
-// THEN I am presented with current and future conditions for that city and that
-// city is added to the search history
 
+//---------------------City Search Input & Dynamic List-------------------------
 
-//Geocode API
-//Requirements: city name, API Key
+var cityList = [];
 
-// function makeGamePlayer(){
-//     var myobj = {
-//         name: "Harry",
-//         score: 7,
-//         gamesplayed: 3,
-//     }
+function renderSearches(){
+    resultContentEl.innerHTML = "";
 
-//     return myobj;
-// }
+ 
 
-// // var player = makeGamePlayer();
+    //Render new button for each city Search
+    for(var i = 0; i < cityList.length; i++){
+        var list = cityList[i];
 
-// // console.log(player);
+        var cityButton = document.createElement("btn");
+        cityButton.textContent = list;
+        cityButton.setAttribute("type", "button");
+        cityButton.setAttribute("class", "btn");
 
-// console.log(makeGamePlayer());
+        searchResultsEl.appendChild(cityButton);
 
+    }
+}
 
+function init() {
+    var storedSearches = JSON.parse(localStorage.getItem("storedSearches"));
 
+    if(storedSearches !== null){
+        cityList = storedSearches;
+    } 
+    
+    
+
+    renderSearches();
+}
+
+function storeSearches(){
+    localStorage.setItem("storedSearches", JSON.stringify(cityList));
+}
+
+searchButtonEl.addEventListener("click", function(event){
+    event.preventDefault();
+
+    var searchText = searchInputEl.value.trim();
+
+    
+
+    if(cityList.length == 5){
+        cityList.splice(0,1);
+    } else{}
+
+    cityList.push(searchText);
+
+    storeSearches();
+    renderSearches();
+})
+
+init();
+
+//---------------------Weather Card Generation------------------------------
 
 function generateWeatherCard(resultObj){
     
@@ -50,23 +87,35 @@ function generateWeatherCard(resultObj){
         return
     } else {}   
 
-    // console.log(resultObj);
-
-    //set up <div> to hold result
+    // Create Cards and Card Body
     var resultCard = document.createElement('div');
-    resultCard.classList.add('card', 'bg-light', 'text-dark', 'mb-3', 'p-3');
-
     var resultBody = document.createElement('div');
-    resultBody.classList.add('card-body');
-    resultCard.append(resultBody);
 
+    // Create Card Elements
     var titleEl = document.createElement('h3');
-    titleEl.textContent = resultObj.date;
-
     var bodyContentEl = document.createElement('p');
     var bodyImageEl = document.createElement('img');
-    
 
+    if(resultObj !== parseCurrent){
+
+        //Style Card
+        resultCard.classList.add('card', 'bg-light', 'text-dark', 'mb-3', 'p-3', 'col', 'row');
+        resultBody.classList.add('card-body', 'col');
+
+        resultCard.append(resultBody);
+        titleEl.textContent = resultObj.date;
+        
+
+    } else {
+
+        //Style hero card
+        resultCard.classList.add('card', 'bg-light', 'text-dark', 'mb-3', 'p-3', 'col', 'row');
+        resultBody.classList.add('card-body');
+        resultCard.append(resultBody);
+
+    }     
+    
+    // Populate card elements with API Object Data
     if (resultObj.date) {
         bodyContentEl.innerHTML +=
           '<strong>Date:</strong> ' + resultObj.date + '<br/>';
@@ -109,7 +158,13 @@ function generateWeatherCard(resultObj){
 
       resultBody.append(titleEl,bodyImageEl, bodyContentEl);
 
-      resultContentEl.append(resultCard);
+      if(resultObj !== parseCurrent){
+        resultContentEl.appendChild(resultCard);
+      } else {
+        currentContentEl.appendChild(resultCard);
+      }
+
+      
     
 }
 
@@ -118,8 +173,9 @@ function generateWeatherCard(resultObj){
 function setWeatherData(event){
 
     event.preventDefault();
-
     var city = searchInputEl.value;
+    
+    console.log("City value: " + city);
 
     console.log("Retrieve/Set Data")
     console.log(city);
@@ -134,7 +190,7 @@ function setWeatherData(event){
         })
         .then(function (data) {
 
-            
+            console.log(data);
 
             for(var i = 0; i < data.list.length; i++){
 
@@ -150,7 +206,6 @@ function setWeatherData(event){
                        }
 
                        console.log(currentObj);
-                       console.log(data.list[i].weather[0].icon);
                        localStorage.setItem("currentObj", JSON.stringify(currentObj));
 
                 } else if(data.list[i].dt_txt == secondDay + " 12:00:00"){
@@ -197,10 +252,20 @@ function setWeatherData(event){
                        }
                        console.log(fifthObj);
                        localStorage.setItem("fifthObj", JSON.stringify(fifthObj));
-                } 
-
+                } else if(data.list[i].dt_txt == sixthDay + " 00:00:00"){
+                    console.log("Sixth Day Hit!");
+                    var sixthObj = {
+                        date: data.list[i].dt_txt,
+                        icon: data.list[i].weather[0].icon,
+                        temp: data.list[i].main.temp,
+                        wind: data.list[i].wind.speed,
+                        humidity: data.list[i].main.humidity,
+                       }
+                       console.log(sixthObj);
+                       localStorage.setItem("sixthObj", JSON.stringify(sixthObj));
+                    }
             }          
-
+        
         });
     
 
@@ -214,18 +279,23 @@ function setWeatherData(event){
     var parseThird = JSON.parse(localStorage.getItem("thirdObj"));
     var parseFourth = JSON.parse(localStorage.getItem("fourthObj"));
     var parseFifth = JSON.parse(localStorage.getItem("fifthObj"));
+    var parseSixth = JSON.parse(localStorage.getItem("sixthObj"));
 
     console.log(parseCurrent);
     console.log(parseSecond);
     console.log(parseThird);
     console.log(parseFourth);
     console.log(parseFifth);
+    console.log(parseSixth);
 
+    //generate main card
     generateWeatherCard(parseCurrent);
+    //generate secondary cards
     generateWeatherCard(parseSecond);
     generateWeatherCard(parseThird);
     generateWeatherCard(parseFourth);
-    generateWeatherCard(parseFifth);    
+    generateWeatherCard(parseFifth); 
+    generateWeatherCard(parseSixth);       
     
 
 function renderCards(){
@@ -237,6 +307,7 @@ function renderCards(){
     generateWeatherCard(parseThird);
     generateWeatherCard(parseFourth);
     generateWeatherCard(parseFifth);
+    generateWeatherCard(parseSixth);
 
 
 }
@@ -249,10 +320,10 @@ searchButtonEl.addEventListener('click', setWeatherData);
 searchButtonEl.addEventListener('click', function(){
     renderCards;
 
-    // setTimeout(()=> {
-    //     location.reload();
-    //  }
-    //  ,200);
+    setTimeout(()=> {
+        location.reload();
+     }
+     ,300);
     
 });
 
