@@ -18,7 +18,7 @@ var city = searchInputEl.value;
 
 //5-day Forecast API
 //Requirements: Latitude, Longitude, API Key.
-var forecastRequestURL = 'api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&appid=7667cfca874b74000c9b36ceae722891&units=metric';
+var forecastRequestURL = 'https://api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&appid=7667cfca874b74000c9b36ceae722891&units=metric';
 
 //---------------------City Search Input & Dynamic List-------------------------
 
@@ -110,8 +110,8 @@ function generateWeatherCard(resultObj){
         resultCard.classList.add('card', 'bg-lighterblue', 'text-dark', 'mb-3', 'p-3', 'col', 'row','m-1');
         resultBody.classList.add('card-body');
         resultCard.append(resultBody);
-        titleEl.textContent = resultObj.date;
-        cityEl.textContent = resultObj.city;
+        // titleEl.textContent = resultObj.date;
+        cityEl.textContent = resultObj.city + " (" + resultObj.date + ")";
 
     }     
     
@@ -125,7 +125,7 @@ function generateWeatherCard(resultObj){
       }
 
       if (resultObj.icon) {
-        bodyImageEl.setAttribute("src", "http://openweathermap.org/img/wn/" + resultObj.icon + "@2x.png");
+        bodyImageEl.setAttribute("src", "https://openweathermap.org/img/wn/" + resultObj.icon + "@2x.png");
         bodyImageEl.setAttribute("alt", "Picture depicting weather conditions at chosen City");
       } else {
         bodyImageEl.innerHTML +=
@@ -182,7 +182,7 @@ function setWeatherData(cityParam){
     } else {
         
         city = cityParam;
-        var geoRequestURL = 'http://api.openweathermap.org/data/2.5/forecast?q=' + cityParam + '&limit=1&appid=' + API + "&units=metric";
+        var geoRequestURL = 'https://api.openweathermap.org/data/2.5/forecast?q=' + cityParam + '&limit=1&appid=' + API + "&units=metric";
     }
     
 
