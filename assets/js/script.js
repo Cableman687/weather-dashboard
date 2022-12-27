@@ -18,7 +18,7 @@ var city = searchInputEl.value;
 
 //5-day Forecast API
 //Requirements: Latitude, Longitude, API Key.
-var forecastRequestURL = 'api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&appid=7667cfca874b74000c9b36ceae722891';
+var forecastRequestURL = 'api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&appid=7667cfca874b74000c9b36ceae722891&units=metric';
 
 //---------------------City Search Input & Dynamic List-------------------------
 
@@ -62,20 +62,19 @@ searchButtonEl.addEventListener("click", function(event){
     var searchText = searchInputEl.value.trim();
 
     
-
+    //Cull Array member variables if array length extends beyond 3.
     if(cityList.length == 3){
         cityList.splice(0,1);
     } else{}
 
     cityList.push(searchText);
+    cityList.reverse();
 
     storeSearches();
     renderSearches();
 })
 
 init();
-
-
 
 //---------------------Weather Card Generation------------------------------
 
@@ -135,7 +134,7 @@ function generateWeatherCard(resultObj){
     
       if (resultObj.temp) {
         bodyContentEl.innerHTML +=
-          '<strong>Temperature:</strong> ' + resultObj.temp + '<br/>';
+          '<strong>Temperature:</strong> ' + resultObj.temp + "\u00B0 C" + '<br/>';
       } else {
         bodyContentEl.innerHTML +=
           '<strong>Temperature:</strong>  No Temperature Available.';
@@ -143,7 +142,7 @@ function generateWeatherCard(resultObj){
 
       if (resultObj.wind) {
         bodyContentEl.innerHTML +=
-          '<strong>Wind Speed:</strong> ' + resultObj.wind + '<br/>';
+          '<strong>Wind Speed:</strong> ' + resultObj.wind + " Kmph" + '<br/>';
       } else {
         bodyContentEl.innerHTML +=
           '<strong>Wind Speed:</strong>  No Wind Measure Available.';
@@ -151,7 +150,7 @@ function generateWeatherCard(resultObj){
 
       if (resultObj.humidity) {
         bodyContentEl.innerHTML +=
-          '<strong>Humidity:</strong> ' + resultObj.humidity + '<br/>';
+          '<strong>Humidity:</strong> ' + resultObj.humidity + "%" + '<br/>';
       } else {
         bodyContentEl.innerHTML +=
           '<strong>Humidity:</strong>  No Humidity Available.';
@@ -170,7 +169,7 @@ function generateWeatherCard(resultObj){
 }
 
 
-
+//---------------------Retrieve Weather Data and Generate Usable Objects------------------------------
 function setWeatherData(cityParam){
 
     
@@ -183,7 +182,7 @@ function setWeatherData(cityParam){
     } else {
         
         city = cityParam;
-        var geoRequestURL = 'http://api.openweathermap.org/data/2.5/forecast?q=' + cityParam + '&limit=1&appid=' + API;
+        var geoRequestURL = 'http://api.openweathermap.org/data/2.5/forecast?q=' + cityParam + '&limit=1&appid=' + API + "&units=metric";
     }
     
 
@@ -197,24 +196,21 @@ function setWeatherData(cityParam){
 
             console.log(data);
 
+            var currentObj = {
+                date: currentDay,
+                icon: data.list[0].weather[0].icon,
+                temp: data.list[0].main.temp,
+                wind: data.list[0].wind.speed,
+                humidity: data.list[0].main.humidity,
+                city: data.city.name + ", " + data.city.country,
+               }
+
+               console.log(currentObj);
+               localStorage.setItem("currentObj", JSON.stringify(currentObj));
+
             for(var i = 0; i < data.list.length; i++){
 
-                if(data.list[i].dt_txt == currentDay + " 12:00:00"){
-                    
-
-                    var currentObj = {
-                        date: currentDay,
-                        icon: data.list[i].weather[0].icon,
-                        temp: data.list[i].main.temp,
-                        wind: data.list[i].wind.speed,
-                        humidity: data.list[i].main.humidity,
-                        city: data.city.name + ", " + data.city.country,
-                       }
-
-                       console.log(currentObj);
-                       localStorage.setItem("currentObj", JSON.stringify(currentObj));
-
-                } else if(data.list[i].dt_txt == secondDay + " 12:00:00"){
+                if(data.list[i].dt_txt == secondDay + " 00:00:00"){
                     var secondObj = {
                         date: secondDay,
                         icon: data.list[i].weather[0].icon,
@@ -225,7 +221,7 @@ function setWeatherData(cityParam){
                        console.log(secondObj);
                        localStorage.setItem("secondObj", JSON.stringify(secondObj));
 
-                } else if(data.list[i].dt_txt == thirdDay + " 12:00:00"){
+                } else if(data.list[i].dt_txt == thirdDay + " 00:00:00"){
                     var thirdObj = {
                         date: thirdDay,
                         icon: data.list[i].weather[0].icon,
@@ -237,7 +233,7 @@ function setWeatherData(cityParam){
                        console.log(thirdObj);
                        localStorage.setItem("thirdObj", JSON.stringify(thirdObj));
                        
-                } else if(data.list[i].dt_txt == fourthDay + " 12:00:00"){
+                } else if(data.list[i].dt_txt == fourthDay + " 00:00:00"){
                     var fourthObj = {
                         date: fourthDay,
                         icon: data.list[i].weather[0].icon,
@@ -248,7 +244,7 @@ function setWeatherData(cityParam){
                        console.log(fourthObj);
                        localStorage.setItem("fourthObj", JSON.stringify(fourthObj));
 
-                } else if(data.list[i].dt_txt == fifthDay + " 12:00:00"){
+                } else if(data.list[i].dt_txt == fifthDay + " 00:00:00"){
                     var fifthObj = {
                         date: fifthDay,
                         icon: data.list[i].weather[0].icon,
@@ -280,19 +276,14 @@ function setWeatherData(cityParam){
     
 }
 
+
+//-----------------------------Parse Weather Data from Local Storage on App. Start--------------------------------
     var parseCurrent = JSON.parse(localStorage.getItem("currentObj"));
     var parseSecond = JSON.parse(localStorage.getItem("secondObj"));
     var parseThird = JSON.parse(localStorage.getItem("thirdObj"));
     var parseFourth = JSON.parse(localStorage.getItem("fourthObj"));
     var parseFifth = JSON.parse(localStorage.getItem("fifthObj"));
     var parseSixth = JSON.parse(localStorage.getItem("sixthObj"));
-
-    console.log(parseCurrent);
-    console.log(parseSecond);
-    console.log(parseThird);
-    console.log(parseFourth);
-    console.log(parseFifth);
-    console.log(parseSixth);
 
     //generate main card
     generateWeatherCard(parseCurrent);
@@ -305,9 +296,7 @@ function setWeatherData(cityParam){
     
 
 function renderCards(){
-
-    console.log("Render Data");
-    
+  
     generateWeatherCard(parseCurrent);
     generateWeatherCard(parseSecond);
     generateWeatherCard(parseThird);
@@ -315,12 +304,10 @@ function renderCards(){
     generateWeatherCard(parseFifth);
     generateWeatherCard(parseSixth);
 
-
 }
 
+
 //----------------------AddEventListeners-----------------------------
-
-
 
 searchButtonEl.addEventListener('click', setWeatherData(city));
 searchButtonEl.addEventListener('click', function(){
