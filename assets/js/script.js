@@ -1,11 +1,11 @@
+//Author API for Weather Data Retrieval
+var API = "7667cfca874b74000c9b36ceae722891";
+
 var searchButtonEl = document.querySelector('.btn');
 var searchInputEl = document.querySelector('#search-input');
 var searchResultsEl = document.querySelector('#search-results');
 var resultContentEl = document.querySelector('#result-content');
 var currentContentEl = document.querySelector('#current-content');
-
-
-var API = "7667cfca874b74000c9b36ceae722891";
 
 var currentDay = dayjs().format('YYYY-MM-DD');
 var secondDay = dayjs().add(1,'day').format('YYYY-MM-DD');
@@ -14,12 +14,11 @@ var fourthDay = dayjs().add(3,'day').format('YYYY-MM-DD');
 var fifthDay = dayjs().add(4,'day').format('YYYY-MM-DD');
 var sixthDay = dayjs().add(5,'day').format('YYYY-MM-DD');
 
-console.log(sixthDay);
+var city = searchInputEl.value;
 
 //5-day Forecast API
 //Requirements: Latitude, Longitude, API Key.
 var forecastRequestURL = 'api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&appid=7667cfca874b74000c9b36ceae722891';
-//--
 
 //---------------------City Search Input & Dynamic List-------------------------
 
@@ -27,8 +26,6 @@ var cityList = [];
 
 function renderSearches(){
     resultContentEl.innerHTML = "";
-
- 
 
     //Render new button for each city Search
     for(var i = 0; i < cityList.length; i++){
@@ -38,6 +35,7 @@ function renderSearches(){
         cityButton.textContent = list;
         cityButton.setAttribute("type", "button");
         cityButton.setAttribute("class", "btn");
+        cityButton.setAttribute("id", "listMember");
 
         searchResultsEl.appendChild(cityButton);
 
@@ -51,8 +49,6 @@ function init() {
         cityList = storedSearches;
     } 
     
-    
-
     renderSearches();
 }
 
@@ -67,7 +63,7 @@ searchButtonEl.addEventListener("click", function(event){
 
     
 
-    if(cityList.length == 5){
+    if(cityList.length == 3){
         cityList.splice(0,1);
     } else{}
 
@@ -78,6 +74,8 @@ searchButtonEl.addEventListener("click", function(event){
 })
 
 init();
+
+
 
 //---------------------Weather Card Generation------------------------------
 
@@ -92,6 +90,7 @@ function generateWeatherCard(resultObj){
     var resultBody = document.createElement('div');
 
     // Create Card Elements
+    var cityEl = document.createElement('h2');
     var titleEl = document.createElement('h3');
     var bodyContentEl = document.createElement('p');
     var bodyImageEl = document.createElement('img');
@@ -99,7 +98,7 @@ function generateWeatherCard(resultObj){
     if(resultObj !== parseCurrent){
 
         //Style Card
-        resultCard.classList.add('card', 'bg-light', 'text-dark', 'mb-3', 'p-3', 'col', 'row');
+        resultCard.classList.add('card', 'bg-grey', 'text-dark', 'mb-3', 'p-3', 'col', 'row', 'm-1');
         resultBody.classList.add('card-body', 'col');
 
         resultCard.append(resultBody);
@@ -108,10 +107,12 @@ function generateWeatherCard(resultObj){
 
     } else {
 
-        //Style hero card
-        resultCard.classList.add('card', 'bg-light', 'text-dark', 'mb-3', 'p-3', 'col', 'row');
+        //Style Hero (Current Day) Card
+        resultCard.classList.add('card', 'bg-lighterblue', 'text-dark', 'mb-3', 'p-3', 'col', 'row','m-1');
         resultBody.classList.add('card-body');
         resultCard.append(resultBody);
+        titleEl.textContent = resultObj.date;
+        cityEl.textContent = resultObj.city;
 
     }     
     
@@ -156,7 +157,7 @@ function generateWeatherCard(resultObj){
           '<strong>Humidity:</strong>  No Humidity Available.';
       }
 
-      resultBody.append(titleEl,bodyImageEl, bodyContentEl);
+      resultBody.append(cityEl, titleEl,bodyImageEl, bodyContentEl);
 
       if(resultObj !== parseCurrent){
         resultContentEl.appendChild(resultCard);
@@ -170,17 +171,21 @@ function generateWeatherCard(resultObj){
 
 
 
-function setWeatherData(event){
+function setWeatherData(cityParam){
 
-    event.preventDefault();
-    var city = searchInputEl.value;
     
-    console.log("City value: " + city);
-
-    console.log("Retrieve/Set Data")
-    console.log(city);
-
-    var geoRequestURL = 'http://api.openweathermap.org/data/2.5/forecast?q=' + city + '&limit=1&appid=' + API;
+    console.log(cityParam);
+    
+    if(cityParam == "" || cityParam == null){
+        
+        return;
+        
+    } else {
+        
+        city = cityParam;
+        var geoRequestURL = 'http://api.openweathermap.org/data/2.5/forecast?q=' + cityParam + '&limit=1&appid=' + API;
+    }
+    
 
     console.log(geoRequestURL);
 
@@ -198,11 +203,12 @@ function setWeatherData(event){
                     
 
                     var currentObj = {
-                        date: data.list[i].dt_txt,
+                        date: currentDay,
                         icon: data.list[i].weather[0].icon,
                         temp: data.list[i].main.temp,
                         wind: data.list[i].wind.speed,
                         humidity: data.list[i].main.humidity,
+                        city: data.city.name + ", " + data.city.country,
                        }
 
                        console.log(currentObj);
@@ -210,7 +216,7 @@ function setWeatherData(event){
 
                 } else if(data.list[i].dt_txt == secondDay + " 12:00:00"){
                     var secondObj = {
-                        date: data.list[i].dt_txt,
+                        date: secondDay,
                         icon: data.list[i].weather[0].icon,
                         temp: data.list[i].main.temp,
                         wind: data.list[i].wind.speed,
@@ -221,7 +227,7 @@ function setWeatherData(event){
 
                 } else if(data.list[i].dt_txt == thirdDay + " 12:00:00"){
                     var thirdObj = {
-                        date: data.list[i].dt_txt,
+                        date: thirdDay,
                         icon: data.list[i].weather[0].icon,
                         temp: data.list[i].main.temp,
                         wind: data.list[i].wind.speed,
@@ -233,7 +239,7 @@ function setWeatherData(event){
                        
                 } else if(data.list[i].dt_txt == fourthDay + " 12:00:00"){
                     var fourthObj = {
-                        date: data.list[i].dt_txt,
+                        date: fourthDay,
                         icon: data.list[i].weather[0].icon,
                         temp: data.list[i].main.temp,
                         wind: data.list[i].wind.speed,
@@ -244,7 +250,7 @@ function setWeatherData(event){
 
                 } else if(data.list[i].dt_txt == fifthDay + " 12:00:00"){
                     var fifthObj = {
-                        date: data.list[i].dt_txt,
+                        date: fifthDay,
                         icon: data.list[i].weather[0].icon,
                         temp: data.list[i].main.temp,
                         wind: data.list[i].wind.speed,
@@ -255,7 +261,7 @@ function setWeatherData(event){
                 } else if(data.list[i].dt_txt == sixthDay + " 00:00:00"){
                     console.log("Sixth Day Hit!");
                     var sixthObj = {
-                        date: data.list[i].dt_txt,
+                        date: sixthDay,
                         icon: data.list[i].weather[0].icon,
                         temp: data.list[i].main.temp,
                         wind: data.list[i].wind.speed,
@@ -312,11 +318,11 @@ function renderCards(){
 
 }
 
+//----------------------AddEventListeners-----------------------------
 
 
 
-
-searchButtonEl.addEventListener('click', setWeatherData);
+searchButtonEl.addEventListener('click', setWeatherData(city));
 searchButtonEl.addEventListener('click', function(){
     renderCards;
 
@@ -326,6 +332,39 @@ searchButtonEl.addEventListener('click', function(){
      ,300);
     
 });
+
+//---------------------Set City Value----------------------------
+
+document.addEventListener("click", function(event){
+    event.preventDefault();
+
+
+    if(event.target.id == "listMember"){
+        city = event.target.textContent;
+        console.log("Selected City: " + city);
+
+    } else if (searchInputEl.value !== ""){
+        city = searchInputEl.value;
+
+    } else {
+        return;
+    }
+
+    
+    
+
+    setWeatherData(city);
+    renderCards;
+
+    setTimeout(()=> {
+        location.reload();
+     }
+     ,300);
+    
+})
+
+
+
 
 
 

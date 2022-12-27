@@ -879,6 +879,10 @@ a:hover {
   text-align: right !important;
 }
 
+.text-left {
+  text-align: left !important;
+}
+
 .text-primary {
   color: #2d3e50 !important;
 }
@@ -942,6 +946,14 @@ a:hover {
 
 .bg-black {
   background-color: #000000 !important;
+}
+
+.bg-grey {
+  background-color: #0071ce !important;
+}
+
+.bg-lighterblue {
+  background-color: #c1daee !important;
 }
 
 .bg-link {
